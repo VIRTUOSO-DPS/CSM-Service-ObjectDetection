@@ -9,11 +9,6 @@
 #include <string>
 #include <vector>
 
-// Colors of bounding boxes
-const std::vector<cv::Scalar> COLORS = {
-    cv::Scalar(255, 255, 0), cv::Scalar(0, 255, 0), cv::Scalar(0, 255, 255),
-    cv::Scalar(255, 0, 0)};
-
 // Detection parameters
 const float INPUT_WIDTH = 640.0;
 const float INPUT_HEIGHT = 640.0;
@@ -31,6 +26,19 @@ struct Detection {
   float Confidence;
   cv::Rect BoundingBox;
 };
+
+auto generateRandomColors(int n) -> std::vector<cv::Scalar> {
+  std::vector<cv::Scalar> ret(n);
+
+  srand(time(0));
+
+  for (auto &color : ret) {
+    color = cv::Scalar{double(128 + rand() % 128), double(128 + rand() % 128),
+                       double(128 + rand() % 128)};
+  }
+
+  return ret;
+}
 
 auto loadClasses() -> std::vector<std::string> {
   // Require that the classes file exists
@@ -134,14 +142,19 @@ auto detect(const cv::Mat &in, cv::dnn::Net &net,
 
 void drawDetections(cv::Mat &inOut, const std::vector<Detection> &detections,
                     const std::vector<std::string> &classes) {
+  const static auto colors = generateRandomColors(classes.size());
+
   for (const auto &detection : detections) {
-    auto box = detection.BoundingBox;
-    auto classId = detection.Class;
-    const auto color = COLORS[classId % COLORS.size()];
+    const auto box = detection.BoundingBox;
+    const auto classId = detection.Class;
+
+    const auto color = colors[classId];
+
     cv::rectangle(inOut, box, color, 3);
 
     cv::rectangle(inOut, cv::Point(box.x, box.y - 20),
                   cv::Point(box.x + box.width, box.y), color, cv::FILLED);
+
     cv::putText(inOut, classes[classId].c_str(), cv::Point(box.x, box.y - 5),
                 cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
   }
