@@ -6,6 +6,9 @@ set(CMAKE_CUDA_ARCHITECTURES 53)
 # Generate compile commands JSON
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Language version
+set(CMAKE_CXX_STANDARD 17)
+
 project(CSM-Service-Edge-ObjectDetection
     LANGUAGES CXX CUDA
 )
@@ -44,6 +47,8 @@ target_include_directories(${SERVICE_TARGET}
     PRIVATE
         # OpenCV
         ${OpenCV_INCLUDE_DIRS}
+
+        stdc++fs
 )
 
 # Copy resources directory to the binary directory
