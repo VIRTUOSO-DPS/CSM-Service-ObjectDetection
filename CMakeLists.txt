@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.16)
 
 # Set the CUDA architecture to 5.3, supported by Jetson Nano
 set(CMAKE_CUDA_ARCHITECTURES 53)
@@ -6,7 +6,7 @@ set(CMAKE_CUDA_ARCHITECTURES 53)
 # Generate compile commands JSON
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Language version
+# Use C++17
 set(CMAKE_CXX_STANDARD 17)
 
 project(CSM-Service-Edge-ObjectDetection
