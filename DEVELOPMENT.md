@@ -67,4 +67,10 @@ The image can be built as follows.
 docker build -f Dockerfile -t csm-service-objectdetection:latest .
 ```
 
+The _CACHEBUST_ argument can be provided to avoid caching the buid stage.
+
+```bash
+--build-arg CACHEBUST=$(date +%s)
+```
+
 When building the Docker image on a Jetson Nano, make sure to use a sufficiently large SD card (e.g. 128GB).

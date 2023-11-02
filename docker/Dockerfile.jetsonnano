@@ -1,3 +1,4 @@
+# Nvidia dependencies stage
 FROM nvcr.io/nvidia/l4t-base:r35.1.0 AS nvidia-dependencies
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -42,6 +43,7 @@ ENV CUDA_HOME="/usr/local/cuda"
 ENV PATH="/usr/local/cuda/bin:${PATH}"
 ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 
+# Build dependencies stage
 FROM nvidia-dependencies AS build-dependencies
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -49,7 +51,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
+# Build stage
 FROM build-dependencies AS build
+
+ARG CACHEBUST=1
 
 WORKDIR /app
 
@@ -58,12 +63,21 @@ RUN git clone --recursive https://github.com/VIRTUOSO-DPS/CSM-Service-ObjectDete
 WORKDIR /app/CSM-Service-ObjectDetection
 
 RUN mkdir build
+
 WORKDIR /app/CSM-Service-ObjectDetection/build
 
 RUN cmake -DCMAKE_BUILD_TYPE=Release ..
 
 RUN cmake --build .
 
+# Run stage
+FROM nvidia-dependencies AS run
+
+COPY --from=build /app/CSM-Service-ObjectDetection/build/csm-service-objectdetection /app/service
+COPY --from=build /app/CSM-Service-ObjectDetection/resources/ /app/resources/
+
+WORKDIR /app
+
 EXPOSE 8000
 
-ENTRYPOINT [ "csm-service-objectdetection" ]
+ENTRYPOINT [ "/app/service" ]
