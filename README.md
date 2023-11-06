@@ -31,3 +31,12 @@ detection, which is crucial for applications like:
 - Easy-to-use web service for initiating inference requests.
 - Utilizes GPU acceleration for faster and more efficient processing.
 - Designed for seamless integration into cloud-edge-IoT applications.
+
+
+## Running
+
+To execute this service on a Nvidia Jetson Nano, we require to run a Docker container as follows.
+
+```bash
+docker run -it --rm --net=host --runtime nvidia -e DISPLAY=$DISPLAY -v /tmp/.X11-unix/:/tmp/.X11-unix csm-service-objectdetection:latest
+```
