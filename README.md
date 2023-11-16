@@ -32,7 +32,6 @@ detection, which is crucial for applications like:
 - Utilizes GPU acceleration for faster and more efficient processing.
 - Designed for seamless integration into cloud-edge-IoT applications.
 
-
 ## Running
 
 To execute this service on a Nvidia Jetson Nano, we require to run a Docker container as follows.

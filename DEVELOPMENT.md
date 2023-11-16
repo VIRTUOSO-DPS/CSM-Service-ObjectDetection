@@ -24,6 +24,8 @@ On Arch Linux, these dependencies are installed as follows.
 yay -S cuda opencv-cuda asio
 ```
 
+Note that CUDA support can be disabled by providing setting _ENABLE_CUDA_ to off.
+
 Assuming the availability of _yay_.
 
 Next, the project can be compiled using CMake. First, create a _build_ directory:

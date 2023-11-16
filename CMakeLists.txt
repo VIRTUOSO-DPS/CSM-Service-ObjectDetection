@@ -10,8 +10,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 
 project(CSM-Service-Edge-ObjectDetection
-    LANGUAGES CXX CUDA
+    LANGUAGES CXX
 )
+
+option(ENABLE_CUDA "Enable CUDA support" ON)
+
+if(ENABLE_CUDA)
+    enable_language(CUDA)
+endif()
 
 # We require OpenCV to be available
 find_package(OpenCV REQUIRED)
