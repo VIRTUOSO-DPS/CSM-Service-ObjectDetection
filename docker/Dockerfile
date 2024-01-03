@@ -44,7 +44,6 @@ RUN mkdir build
 WORKDIR /tmp/opencv/build
 
 RUN cmake -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_INSTALL_PREFIX=/usr \
     -DOPENCV_EXTRA_MODULES_PATH=/tmp/opencv_contrib/modules \
     -DEIGEN_INCLUDE_PATH=/usr/include/eigen3 \
     -DWITH_OPENCL=OFF \
@@ -77,7 +76,11 @@ RUN cmake -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_EXAMPLES=OFF \
     ..
 
-RUN make -j24 && make install
+RUN make -j$(($(nproc) - 1))
+RUN make install
+
+RUN rm -rf /tmp/opencv \
+    && rm -rf /tmp/opencv_contrib
 
 ENV CUDA_HOME="/usr/local/cuda"
 ENV PATH="/usr/local/cuda/bin:${PATH}"
@@ -107,7 +110,9 @@ RUN cmake -DCMAKE_BUILD_TYPE=Release ..
 RUN cmake --build .
 
 # Run stage
-FROM nvidia-dependencies AS run
+FROM build-opencv AS run
+
+COPY --from=build /tmp/opencv/build/ /tmp/
 
 COPY --from=build /app/CSM-Service-ObjectDetection/build/csm-service-objectdetection /app/service
 COPY --from=build /app/CSM-Service-ObjectDetection/resources/ /app/resources/
