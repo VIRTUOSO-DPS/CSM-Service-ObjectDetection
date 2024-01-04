@@ -46,3 +46,33 @@ systemctl daemon-reload
 systemctl enable csm-service-objectdetection.service
 systemctl start csm-service-objectdetection.service
 ```
+
+The following configuration has been tested:
+
+```
+-- The CXX compiler identification is GNU 7.5.0
+-- The CUDA compiler identification is NVIDIA 10.2.300
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /usr/local/cuda/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE
+-- Found CUDA: /usr/local/cuda (found suitable exact version "10.2")
+-- Found OpenCV: /usr/local (found version "4.8.0")
+-- Found asio: /usr/local/include
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /tmp/CSM-Service-ObjectDetection/build
+```
