@@ -1,0 +1,15 @@
+[Unit]
+Description=CSM Service Object Detection
+
+[Service]
+Type=simple
+ExecStart=/opt/csm-service-objectdetection/csm-service-objectdetection
+WorkingDirectory=/opt/csm-service-objectdetection/
+Restart=always
+RestartSec=3
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=csm-service-objectdetection
+
+[Install]
+WantedBy=default.target

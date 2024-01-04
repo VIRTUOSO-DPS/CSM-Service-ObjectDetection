@@ -2,75 +2,47 @@
 
 ## Compiling
 
-The following instructions describe the required steps to build the project on Linux and Nvida Jetson (Nano).
-
-### Linux
-
-To compile, make sure that OpenCV is available, developed and tested against versions:
-
-- 4.8.1
-
-Additionally, the CUDA Toolkit needs to be available, developed and tested against versions:
-
-- 12.2
-
-Crow requires ASIO to be installed, developed and tested against versions:
-
-- 1.28.0
-
-On Arch Linux, these dependencies are installed as follows.
-
-```bash
-yay -S cuda opencv-cuda asio
-```
-
-Assuming the availability of _yay_.
-
-Next, the project can be compiled using CMake. First, create a _build_ directory:
-
-```bash
-mkdir build && cd build
-```
-
-Next, use CMake for generation and building:
-
-```bash
-cmake ../
-```
-
-It may be necessary to provide more information to CMake for locating CUDA, for example:
-
-```bash
-cmake -DCUDAToolkit_ROOT=/opt/cuda/bin/ -DCMAKE_CUDA_COMPILER=/opt/cuda/bin/nvcc ../
-```
-
-Next, the project can be built:
-
-```bash
-cmake --build .
-```
-
-### Nvidia Jetson
-
-Please refer to the instructions for building the Nvidia Jetson Nano Docker image below.
-
-## Building Docker images
-
-Docker files for building Docker images are provided in the _docker_ folder.
+The following instructions describe the required steps to build and install the service on Nvida Jetson (Nano).
 
 ### Nvidia Jetson Nano
 
-The _docker_ folder contains a Dockerfile for building a Docker image for the Nvidia Jetson Nano.
-The image can be built as follows.
+OpenCV compiled with CUDA and cuDNN support is required for fast processing. To ease the process of building OpenCV,
+a script _scripts/build-opencv.sh_ is provided. Compilation time is significant, it may pay off to, instead of removing
+the build root generate a DEB package after compilation.
+
+The ASIO development libraries need to be installed. Unfortunately, no recent enough version of ASIO is provided in the
+Ubuntu 18.04 (which the L4T image is based on) package repository, and ASIO needs to be built from the sources. This is
+fairly straightforward, however.
+
+Acquire the ASIO source code from the website: https://think-async.com/Asio/, after acquiring the sources proceed as
+follows.
 
 ```bash
-docker build -f Dockerfile -t csm-service-objectdetection:latest .
+./configure
+make
+make install
 ```
 
-The _CACHEBUST_ argument can be provided to avoid caching the buid stage.
+Next, this project can be built as follows.
 
 ```bash
---build-arg CACHEBUST=$(date +%s)
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build .
+cmake --install .
 ```
 
-When building the Docker image on a Jetson Nano, make sure to use a sufficiently large SD card (e.g. 128GB).
+It may be required to export the following variables:
+
+```bash
+export CUDA_HOME="/usr/local/cuda"
+export PATH="/usr/local/cuda/bin:${PATH}"
+export LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
+```
+
+A service named _csm-service-objectdetection.service_ is installed, it can be enabled as follows.
+
+```bash
+systemctl daemon-reload
+systemctl enable csm-service-objectdetection.service
+systemctl start csm-service-objectdetection.service
+```

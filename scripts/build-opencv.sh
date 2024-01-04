@@ -1,20 +1,15 @@
-# Nvidia dependencies stage
-FROM nvcr.io/nvidia/l4t-jetpack:r35.1.0 AS nvidia-dependencies
+#!/bin/bash
 
-# Build OpenCV stage
-FROM nvidia-dependencies AS build-opencv
-
-# OpenCV
-RUN apt-get update \
-    && apt purge -y *libopencv* \
+# OpenCV dependencies
+apt-get update \
+    && apt purge -y *libopencv* cmake \
     && apt-get install -y --no-install-recommends \
-    build-essential git unzip pkg-config zlib1g-dev \
+    build-essential git unzip pkg-config zlib1g-dev wget \
     python3-dev python3-numpy \
     python-dev python-numpy \
     gstreamer1.0-tools libgstreamer-plugins-base1.0-dev \
     libgstreamer-plugins-good1.0-dev \
     libtbb2 libgtk-3-dev libxine2-dev \
-    cmake \
     libjpeg-dev libjpeg8-dev libjpeg-turbo8-dev \
     libpng-dev libtiff-dev libglew-dev \
     libavcodec-dev libavformat-dev libswscale-dev \
@@ -34,16 +29,25 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-WORKDIR /tmp
+# CMake
+wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null \
+    && echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ bionic main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends cmake
 
-RUN git clone --depth=1 --branch 4.8.0 https://github.com/opencv/opencv.git \
+cd /tmp/
+
+# Clone OpenCV sources
+git clone --depth=1 --branch 4.8.0 https://github.com/opencv/opencv.git \
     && git clone --depth=1 --branch 4.8.0 https://github.com/opencv/opencv_contrib.git
-WORKDIR /tmp/opencv
 
-RUN mkdir build
-WORKDIR /tmp/opencv/build
+cd /tmp/opencv/
 
-RUN cmake -DCMAKE_BUILD_TYPE=Release \
+# Make build directory
+mkdir /tmp/opencv/build && cd /tmp/opencv/build
+
+# Build
+cmake -DCMAKE_BUILD_TYPE=Release \
     -DOPENCV_EXTRA_MODULES_PATH=/tmp/opencv_contrib/modules \
     -DEIGEN_INCLUDE_PATH=/usr/include/eigen3 \
     -DWITH_OPENCL=OFF \
@@ -76,49 +80,8 @@ RUN cmake -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_EXAMPLES=OFF \
     ..
 
-RUN make -j$(($(nproc) - 1))
-RUN make install
+make -j$(($(nproc) - 1))
+make install
 
-RUN rm -rf /tmp/opencv \
-    && rm -rf /tmp/opencv_contrib
-
-ENV CUDA_HOME="/usr/local/cuda"
-ENV PATH="/usr/local/cuda/bin:${PATH}"
-ENV LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
-
-# Build OpenCV stage
-FROM build-opencv AS build-dependencies
-
-# Build dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git libasio-dev cmake build-essential \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
-
-# Build stage
-FROM build-dependencies AS build
-
-WORKDIR /app
-
-RUN git clone --recursive https://github.com/VIRTUOSO-DPS/CSM-Service-ObjectDetection.git
-WORKDIR /app/CSM-Service-ObjectDetection
-
-RUN mkdir build
-WORKDIR /app/CSM-Service-ObjectDetection/build
-
-RUN cmake -DCMAKE_BUILD_TYPE=Release ..
-RUN cmake --build .
-
-# Run stage
-FROM build-opencv AS run
-
-COPY --from=build /tmp/opencv/build/ /tmp/
-
-COPY --from=build /app/CSM-Service-ObjectDetection/build/csm-service-objectdetection /app/service
-COPY --from=build /app/CSM-Service-ObjectDetection/resources/ /app/resources/
-
-WORKDIR /app
-
-EXPOSE 8001
-
-ENTRYPOINT [ "/app/service" ]
+# Remove sources and build output
+rm -rf /tmp/opencv && rm -rf /tmp/opencv_contrib

@@ -5,7 +5,6 @@
 #include <opencv2/opencv.hpp>
 
 // Stdlib
-#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -41,11 +40,6 @@ auto generateRandomColors(int n) -> std::vector<cv::Scalar> {
 }
 
 auto loadClasses() -> std::vector<std::string> {
-  // Require that the classes file exists
-  if (!std::filesystem::exists(CLASSES_FILE_PATH)) {
-    throw std::runtime_error("Classes file does not exist");
-  }
-
   // Load classes text file into returned collection
   std::vector<std::string> ret;
   std::ifstream ifs(CLASSES_FILE_PATH);
@@ -55,11 +49,6 @@ auto loadClasses() -> std::vector<std::string> {
 }
 
 inline auto loadNetwork() -> cv::dnn::Net {
-  // Require that the classes file exists
-  if (!std::filesystem::exists(NETWORK_FILE_PATH)) {
-    throw std::runtime_error("Network file does not exist");
-  }
-
   // Load the network
   auto result = cv::dnn::readNet(NETWORK_FILE_PATH);
 
@@ -166,12 +155,6 @@ int main(int, char *[]) {
 #ifndef NDEBUG
   app.loglevel(crow::LogLevel::Debug);
 #endif // NDEBUG
-
-  // Ensure that the resources directory exists
-  if (!std::filesystem::exists(RESOURCES_PATH)) {
-    CROW_LOG_CRITICAL << "Resources directory is not in path";
-    return -1;
-  }
 
   // Load classes
   std::vector<std::string> classes;

@@ -47,8 +47,6 @@ target_include_directories(${SERVICE_TARGET}
     PRIVATE
         # OpenCV
         ${OpenCV_INCLUDE_DIRS}
-
-        stdc++fs
 )
 
 # Copy resources directory to the binary directory
@@ -57,3 +55,30 @@ add_custom_command(TARGET ${SERVICE_TARGET}
         COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_ROOT}/resources" "${CMAKE_BINARY_DIR}/resources"
 )
 add_custom_target(CopyResources ALL DEPENDS ${SERVICE_TARGET} )
+
+# Installation paths
+set(INSTALL_PREFIX "/opt/csm-service-objectdetection")
+
+# Install executable
+install(
+    TARGETS 
+        ${SERVICE_TARGET} 
+    DESTINATION 
+        ${INSTALL_PREFIX}
+)
+
+# Install resources directory
+install(
+    DIRECTORY 
+        "${PROJECT_ROOT}/resources" 
+    DESTINATION 
+        ${INSTALL_PREFIX}
+)
+
+# Install service
+install(
+    FILES 
+        "${PROJECT_ROOT}/csm-service-objectdetection.service"
+    DESTINATION 
+        /etc/systemd/system
+)
