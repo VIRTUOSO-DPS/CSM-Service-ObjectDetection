@@ -176,9 +176,9 @@ int main(int, char *[]) {
   }
   CROW_LOG_INFO << "Loaded network";
 
-  // Process (GET) endpoint
+  // Process (POST) endpoint
   CROW_ROUTE(app, "/process").methods(
-      "GET"_method)([&](const crow::request &req, crow::response &res) {
+      "POST"_method)([&](const crow::request &req, crow::response &res) {
     if (!req.body.empty()) {
       // Attempt to load the image
       cv::Mat image;
