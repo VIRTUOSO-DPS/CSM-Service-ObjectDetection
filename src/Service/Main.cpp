@@ -176,19 +176,15 @@ int main(int, char *[]) {
   }
   CROW_LOG_INFO << "Loaded network";
 
-  // Process (POST) endpoint
+  // Process (GET) endpoint
   CROW_ROUTE(app, "/").methods(
-      "POST"_method)([&](const crow::request &req, crow::response &res) {
+      "GET"_method)([&](const crow::request &req, crow::response &res) {
     if (!req.body.empty()) {
       // Attempt to load the image
       cv::Mat image;
       cv::Mat rawData(1, req.body.size(), CV_8U, (void *)req.body.data());
 
       image = cv::imdecode(rawData, cv::IMREAD_COLOR);
-
-      CROW_LOG_DEBUG << "Processing image type (" << image.type()
-                     << ") dimensions (" << image.cols << "x" << image.rows
-                     << ")";
 
       if (!image.empty()) {
         // Perform detection
